@@ -22,11 +22,4 @@ class Packet:
             self.__data.hex()
         )
 
-        print(
-            struct.pack('i', len(self.__data)).hex() +
-            struct.pack('b', self.__seqId).hex() +
-            self.__data.hex()
-        )
-        print (packet)
-
         return packet
