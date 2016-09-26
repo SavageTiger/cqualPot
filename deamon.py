@@ -5,6 +5,7 @@ from _thread import *
 
 host = '0.0.0.0'
 port = 3309
+connectionId = 1
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -20,4 +21,6 @@ serverSocket.listen(5)
 while True:
     connection = serverSocket.accept()
 
-    start_new_thread(Worker.Worker, (connection[0],))
+    connectionId += 1
+
+    start_new_thread(Worker.Worker, (connection[0], connectionId,))
