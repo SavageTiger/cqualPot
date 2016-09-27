@@ -1,17 +1,27 @@
 import struct
 import socket
 
+from protocol import Constants
 from protocol import Packet
 
 class Auth:
 
     def receiveCredentials(self, connection: socket.socket, salt: str):
 
-        bufferSize = connection.recv(3) + b'\x00'
-        bufferSize = struct.unpack('i', bufferSize)
-        bufferSize = bufferSize[0]
+        packet = Packet.Packet()
+        packet.fromSocket(connection)
 
-        data = connection.recv(bufferSize)
+        data = packet.getData(True)
 
-        print(salt)
-        print(data)
+        print (data)
+
+        client                 = {}
+        client['seqId']        = packet.getSeqId()
+        client['capabilities'] = struct.unpack('i', data[0:4])[0]
+        client['maxPacket']    = struct.unpack('i', data[4:8])[0]
+        client['charSet']      = struct.unpack('b', data[8:9])[0]
+
+        # Skip reserved
+        data = data[16:]
+
+        return client

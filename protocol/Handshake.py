@@ -10,16 +10,16 @@ class Handshake:
     def send(self, connection: socket.socket, connectionId: int):
 
         salt         = str(uuid.uuid4())[0: 8]
-        salt2        = str(uuid.uuid4())[8: 13]
+        salt2        = str(uuid.uuid4())[0: 13]
         capabilities = struct.pack(
-            'I', Constants.CLIENT_PROTOCOL_41|
-                 Constants.CLIENT_SECURE_CONNECTION|
-                 Constants.CLIENT_NO_SCHEMA|
-                 Constants.CLIENT_IGNORE_SPACE|
-                 Constants.CLIENT_LONG_PASSWORD|
-                 Constants.CLIENT_INTERACTIVE|
-                 Constants.CLIENT_TRANSACTIONS|
-                 Constants.CLIENT_PLUGIN_AUTH |
+            'I', Constants.CLIENT_PROTOCOL_41 +
+                 Constants.CLIENT_SECURE_CONNECTION +
+                 Constants.CLIENT_NO_SCHEMA +
+                 Constants.CLIENT_IGNORE_SPACE +
+                 Constants.CLIENT_LONG_PASSWORD +
+                 Constants.CLIENT_INTERACTIVE +
+                 Constants.CLIENT_TRANSACTIONS +
+                 Constants.CLIENT_PLUGIN_AUTH +
                  Constants.CLIENT_CONNECT_WITH_DB
         )
 
@@ -33,10 +33,12 @@ class Handshake:
         packet.append(bytes([capabilities[0], capabilities[1]])) # Capabilities (lower bytes)
         packet.append(struct.pack('b', 8))                       # ID 8 = latin1_swedish_ci (usually)
         packet.append(struct.pack('b', 2))                       # Status flag (2 = autocommit is enabled)
+        packet.append(struct.pack('b', 0))                       # Status terminator
         packet.append(bytes([capabilities[2], capabilities[3]])) # Capabilities (upper bytes)
-        packet.append(struct.pack('b', len(salt) + len(salt2)))  # Auth data len
-        packet.append('mysql_native_password'.encode())          # Auth plugin
+        packet.append(struct.pack('b', len(salt2) + len(salt)))  # Auth data (part 2) len
+        packet.append(bytes([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))     # 10 bytes of Filler
         packet.append(salt2.encode())                            # Auth data 2
+        packet.append('mysql_native_password'.encode())          # Auth plugin
         packet.append(struct.pack('b', 0))                       # Handshake terminator
 
         connection.send(packet.getData())
