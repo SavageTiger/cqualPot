@@ -20,7 +20,7 @@ class Worker:
         auth.receiveCredentials(self.__connection)
 
         if auth.verify('Sven', 'test', self.__salt):
-            auth.accept()
+            auth.accept(self.__connection)
         else:
             auth.deny()
 

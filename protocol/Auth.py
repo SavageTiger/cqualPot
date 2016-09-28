@@ -9,9 +9,17 @@ class Auth:
 
     __client = None
 
-    def accept(self):
-        print('accept')
-        pass
+    def accept(self, connection: socket.socket):
+        packet = Packet.Packet(1)
+        packet.append(struct.pack('b', 0)) # Header
+        packet.append(struct.pack('b', 0)) # Affected Rows
+        packet.append(struct.pack('b', 0)) # Last insert ID
+        packet.append(struct.pack('h', 2)) # Status flag (autocommit)
+        packet.append(struct.pack('h', 0)) # Warning count
+
+        print(packet.getData())
+
+        connection.send(packet.getData())
 
     def deny(self):
         print('deny')
@@ -77,12 +85,11 @@ class Auth:
                 client['database'] = client['database'] + data[0:1].decode()
                 data = data[1:]
 
-        # Remove terminator
-        data = data[1:]
-
-        # Read plugin name until terminator
-        while data[0:1] != b'\x00':
-            client['pluginName'] = client['pluginName'] + data[0:1].decode()
+            # Remove terminator
             data = data[1:]
+
+        # Read plugin name (assume the remainder of the package).
+        # Note: not all mysql clients send the terminator byte.
+        client['pluginName'] = data.decode().rstrip('\0')
 
         self.__client = client
