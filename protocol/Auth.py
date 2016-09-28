@@ -2,6 +2,7 @@ import struct
 import socket
 from hashlib import sha1
 
+from protocol import Constants
 from protocol import Packet
 
 class Auth:
@@ -71,9 +72,10 @@ class Auth:
         data = data[hashLength:]
 
         # Read database name until terminator
-        while data[0:1] != b'\x00':
-            client['database'] = client['database'] + data[0:1].decode()
-            data = data[1:]
+        if client['capabilities'] & Constants.CLIENT_CONNECT_WITH_DB:
+            while data[0:1] != b'\x00':
+                client['database'] = client['database'] + data[0:1].decode()
+                data = data[1:]
 
         # Remove terminator
         data = data[1:]
