@@ -1,4 +1,5 @@
 
 from mysql import connector
 
-conn = connector.connect(user='joe', database='test', port=3309, password='plopjes')
+#conn = connector.connect(user='Sven', password='Angels on the sideline', port=3309)
+conn = connector.connect(user='Sven', password='test', port=3309, database='plopjes')

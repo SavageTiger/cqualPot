@@ -9,8 +9,6 @@ class Worker:
     __connection   = None
 
     def __init__(self, connection, connectionId):
-        print ('Init' + str(connectionId))
-
         self.__connectionId = connectionId
         self.__connection   = connection
 
@@ -19,7 +17,12 @@ class Worker:
 
     def authenticate(self):
         auth = Auth.Auth()
-        auth.receiveCredentials(self.__connection, self.__salt)
+        auth.receiveCredentials(self.__connection)
+
+        if auth.verify('Sven', 'test', self.__salt):
+            auth.accept()
+        else:
+            auth.deny()
 
 
     def handShake(self):
