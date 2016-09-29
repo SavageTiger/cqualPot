@@ -9,15 +9,37 @@ class Auth:
 
     __client = None
 
-    def accept(self, connection: socket.socket):
-        packet = Packet.Packet(1)
-        packet.append(struct.pack('b', 0)) # Header
-        packet.append(struct.pack('b', 0)) # Affected Rows
-        packet.append(struct.pack('b', 0)) # Last insert ID
-        packet.append(struct.pack('h', 2)) # Status flag (autocommit)
-        packet.append(struct.pack('h', 0)) # Warning count
+    def accept(self, connection: socket.socket, salt: str):
+        if not \
+        self.__client['capabilities'] & Constants.CLIENT_PLUGIN_AUTH or \
+        self.__client['pluginName'] != 'mysql_native_password':
+            # TODO: Log incompatibility error
+            # TODO: Send a ERR_PACKET (or just call deny()?)
+            connection.close()
+            quit()
 
-        print(packet.getData())
+        # Stage 1: Auth switch request
+        packet = Packet.Packet(1)
+        packet.append(bytes([254]))                     # Header
+        packet.append('mysql_native_password'.encode()) # Plugin name
+        packet.append(struct.pack('b', 0))              # Plugin name terminator
+        packet.append(salt.encode())                    # Auth data (ROS)
+
+        connection.send(packet.getData())
+
+        # Stage 2: Re-authentication
+        packet = Packet.Packet()
+        packet.fromSocket(connection)
+
+        if not self.__client['passwordHash'] == packet.getData(True):
+            # This should never happen...
+            # TODO: Send a ERR_PACKET (or just call deny()?)
+            connection.close()
+            quit()
+
+        # Stage 3: Send a OK packet, the server is happy.
+        packet = Packet.Packet(2)
+        packet.createOkPacket(0)
 
         connection.send(packet.getData())
 
@@ -29,8 +51,6 @@ class Auth:
         # Convert salt to bytes
         salt  = salt.encode()
 
-        print(self.__client)
-
         passwordHashStage1 = sha1(password.encode()).digest()
         passwordHashStage2 = sha1(passwordHashStage1).digest()
         xorKey             = sha1(salt + passwordHashStage2).digest()
@@ -38,8 +58,6 @@ class Auth:
         expectedHash = bytearray()
         for i in range(0, len(xorKey)):
             expectedHash.append(xorKey[i] ^ passwordHashStage1[i])
-
-        print(expectedHash)
 
         return \
             self.__client['username'].lower() == username.lower() and \

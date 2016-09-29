@@ -29,6 +29,15 @@ class Packet:
         self.__seqId = struct.unpack('b', data[0:1])[0]
         self.__data  = data[1:]
 
+    def createOkPacket(self, header: int, affectedRows: int = 0, lastInsertId: int = 0, status: int = 0, warnings: int = 0, transFlags: int = 0, errorMsg: str = ''):
+        self.append(bytes(header))
+        self.append(bytes(affectedRows)) # TODO: Support lenenc
+        self.append(bytes(lastInsertId)) # TODO: Support lenenc
+        self.append(struct.pack('i', status))
+        self.append(struct.pack('i', warnings))
+        self.append(struct.pack('i', transFlags))
+        self.append(errorMsg.encode()) # (type = ROP)
+
     def getSeqId(self):
         return self.__seqId
 

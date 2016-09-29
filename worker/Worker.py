@@ -1,6 +1,7 @@
 
 from protocol import Handshake
 from protocol import Auth
+import time
 
 class Worker:
 
@@ -20,11 +21,17 @@ class Worker:
         auth.receiveCredentials(self.__connection)
 
         if auth.verify('Sven', 'test', self.__salt):
-            auth.accept(self.__connection)
+            auth.accept(self.__connection, self.__salt)
+
+            self.commandLoop()
         else:
             auth.deny()
-
 
     def handShake(self):
         handshake   = Handshake.Handshake()
         self.__salt = handshake.send(self.__connection, self.__connectionId)
+
+    def commandLoop(self):
+        while True:
+            print('Tick')
+            time.sleep(1)
