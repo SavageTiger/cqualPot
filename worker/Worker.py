@@ -1,13 +1,16 @@
 
 from protocol import Handshake
 from protocol import Auth
-import time
+from protocol import Packet
+from protocol import Constants
+from protocol import Commands
 
 class Worker:
 
     __salt         = ''
     __connectionId = 1
     __connection   = None
+    __seqId        = 2
 
     def __init__(self, connection, connectionId):
         self.__connectionId = connectionId
@@ -32,6 +35,15 @@ class Worker:
         self.__salt = handshake.send(self.__connection, self.__connectionId)
 
     def commandLoop(self):
+        command = Commands.Commands()
+
         while True:
-            print('Tick')
-            time.sleep(1)
+            packet = Packet.Packet()
+            packet.fromSocket(self.__connection)
+
+            if Constants.SERVER_CMD_QUERY == packet.getData(True)[0]:
+                self.__seqId += 1
+
+                command.handleQuery(self.__seqId, packet, self.__connection)
+            else:
+                print('Unknown packet')
