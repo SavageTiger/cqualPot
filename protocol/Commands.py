@@ -1,5 +1,6 @@
 from protocol import Packet
 from protocol import Sqlite
+from protocol import Util
 import socket
 
 class Commands:
@@ -10,8 +11,6 @@ class Commands:
         self.__database = Sqlite.Sqlite()
 
     def handleQuery(self, seqId: int, packet: Packet.Packet, socket: socket.socket):
-        response = Packet.Packet(seqId)
-
         query = packet.getData(True)[1:]
         query = query.decode()
 
@@ -20,6 +19,17 @@ class Commands:
         print('Query: "' + query + '"')
         print('Result: ' + str(result))
 
-        response.createOkPacket(0, len(result))
+        # No results, return a OK package
+        if (len(result) == 0):
+            response = Packet.Packet(seqId)
+            response.createOkPacket(0)
+
+            socket.send(response.getData())
+
+            return seqId
+
+        # Stage 1: Send the column count package
+        response = Packet.Packet(seqId)
+        response.append(Util.Util.lenEnc(Util.Util.columnCount(result)))
 
         socket.send(response.getData())

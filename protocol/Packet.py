@@ -1,6 +1,8 @@
 import socket
 import struct
 
+from protocol import Util
+
 class Packet:
 
     __data  = None
@@ -31,8 +33,8 @@ class Packet:
 
     def createOkPacket(self, header: int, affectedRows: int = 0, lastInsertId: int = 0, status: int = 0, warnings: int = 0, transFlags: int = 0, errorMsg: str = ''):
         self.append(bytes(header))
-        self.append(bytes(affectedRows)) # TODO: Support lenenc
-        self.append(bytes(lastInsertId)) # TODO: Support lenenc
+        self.append(Util.Util.lenEnc(affectedRows))
+        self.append(Util.Util.lenEnc(lastInsertId))
         self.append(struct.pack('i', status))
         self.append(struct.pack('i', warnings))
         self.append(struct.pack('i', transFlags))
