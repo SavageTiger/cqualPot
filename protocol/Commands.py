@@ -15,8 +15,10 @@ class Commands:
         query = query.decode()
 
         result = self.__database.executeQuery(query)
+        table  = self.__database.guessTable()
 
         print('Query: "' + query + '"')
+        print('Guessed table: "' + table + '"')
         print('Result: ' + str(result))
 
         # No results, return a OK package
