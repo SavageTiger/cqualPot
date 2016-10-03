@@ -31,13 +31,21 @@ class Packet:
         self.__seqId = struct.unpack('b', data[0:1])[0]
         self.__data  = data[1:]
 
-    def createColumnPacket(self, database: str, table: str, column: str):
+    def createColumnPacket(self, database: str, table: str, column: str, columnLenght: int, columnType: int):
         self.append(Util.Util.lenEncodedString("def"))    # catalog (always "def")
         self.append(Util.Util.lenEncodedString(database)) # db (schema?)
         self.append(Util.Util.lenEncodedString(table))    # table
         self.append(Util.Util.lenEncodedString(table))    # org_table (same as table)
         self.append(Util.Util.lenEncodedString(column))   # name
         self.append(Util.Util.lenEncodedString(column))   # org_name (same as name)
+        self.append(bytes(12))                            # upcoming fields length [always: 0c]
+        self.append(struct.pack('b', 8) + b'\x00')        # Charset ID 8 = latin1_swedish_ci (usually)
+        self.append(struct.pack('i', columnLenght))       # Column length
+        self.append(struct.pack('b', columnType))         # Column type (see Constants)
+        self.append(struct.pack('h', 0))                  # Flags (todo)
+        self.append(struct.pack('b', 0))                  # Decimals
+        self.append(b'\x00\x00')                          # Filler
+
 
     def createOkPacket(self, header: int, affectedRows: int = 0, lastInsertId: int = 0, status: int = 0, warnings: int = 0, transFlags: int = 0, errorMsg: str = ''):
         self.append(bytes(header))

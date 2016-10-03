@@ -38,8 +38,12 @@ class Commands:
         seqId += 1
 
         # Stage 2: Send the column definition packages
-        for i in range(0, Util.Util.columnCount(result)):
-            response.createColumnPacket(client['database'], table, 'TODO')
+        definition = self.__database.getColumnDefinitions()
+
+        for colDef in definition:
+            response.createColumnPacket(
+                client['database'], table, colDef['name'], colDef['length'], colDef['type']
+            )
 
             socket.send(response.getData())
             seqId += 1

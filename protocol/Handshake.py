@@ -31,7 +31,7 @@ class Handshake:
         packet.append(salt.encode())                                # Auth salt
         packet.append(struct.pack('b', 0))                          # Salt Terminator
         packet.append(bytes([capabilities[0], capabilities[1]]))    # Capabilities (lower bytes)
-        packet.append(struct.pack('b', 8))                          # ID 8 = latin1_swedish_ci (usually)
+        packet.append(struct.pack('b', 8))                          # Charset ID 8 = latin1_swedish_ci (usually)
         packet.append(struct.pack('b', 2))                          # Status flag (2 = autocommit is enabled)
         packet.append(struct.pack('b', 0))                          # Status terminator
         packet.append(bytes([capabilities[2], capabilities[3]]))    # Capabilities (upper bytes)
