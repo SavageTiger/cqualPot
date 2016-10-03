@@ -31,14 +31,13 @@ class Packet:
         self.__seqId = struct.unpack('b', data[0:1])[0]
         self.__data  = data[1:]
 
-    def createColumnPacket(self):
-        # catalog (always "Def")
-        # db
-        # table
-        # org_table (same as table)
-        # name
-        # org_name (same as name)
-        pass
+    def createColumnPacket(self, database: str, table: str, column: str):
+        self.append(Util.Util.lenEncodedString("def"))    # catalog (always "def")
+        self.append(Util.Util.lenEncodedString(database)) # db (schema?)
+        self.append(Util.Util.lenEncodedString(table))    # table
+        self.append(Util.Util.lenEncodedString(table))    # org_table (same as table)
+        self.append(Util.Util.lenEncodedString(column))   # name
+        self.append(Util.Util.lenEncodedString(column))   # org_name (same as name)
 
     def createOkPacket(self, header: int, affectedRows: int = 0, lastInsertId: int = 0, status: int = 0, warnings: int = 0, transFlags: int = 0, errorMsg: str = ''):
         self.append(bytes(header))

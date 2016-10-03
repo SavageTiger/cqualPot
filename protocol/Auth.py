@@ -43,9 +43,11 @@ class Auth:
 
         connection.send(packet.getData())
 
+        return self.__client
+
     def deny(self):
-        print('deny')
-        pass
+        print('deny') # TODO
+        return self.__client
 
     def verify(self, username: str, password: str, salt: str):
         # Convert salt to bytes

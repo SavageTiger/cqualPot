@@ -10,6 +10,22 @@ class Util:
 
         return len(hashMap[0])
 
+    @staticmethod
+    def columnNames(hashMap):
+        if len(hashMap) == 0:
+            return {}
+
+        return hashMap[0].keys()
+
+    @staticmethod
+    def lenEncodedString(input: str):
+        lenByte = Util.lenEnc(len(input))
+        buffer  = bytearray(lenByte)
+
+        for i in range(0, len(input)):
+            buffer.append(ord(input[i]))
+
+        return buffer
 
     @staticmethod
     def lenEnc(input: int):

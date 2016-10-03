@@ -11,6 +11,7 @@ class Worker:
     __connectionId = 1
     __connection   = None
     __seqId        = 2
+    __client       = None
 
     def __init__(self, connection, connectionId):
         self.__connectionId = connectionId
@@ -24,7 +25,7 @@ class Worker:
         auth.receiveCredentials(self.__connection)
 
         if auth.verify('Sven', 'test', self.__salt):
-            auth.accept(self.__connection, self.__salt)
+            self.__client = auth.accept(self.__connection, self.__salt)
 
             self.commandLoop()
         else:
@@ -44,6 +45,6 @@ class Worker:
             if Constants.SERVER_CMD_QUERY == packet.getData(True)[0]:
                 self.__seqId += 1
 
-                command.handleQuery(self.__seqId, packet, self.__connection)
+                command.handleQuery(self.__seqId, packet, self.__connection, self.__client)
             else:
                 print('Unknown packet')
