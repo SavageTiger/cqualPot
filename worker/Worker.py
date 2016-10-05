@@ -10,7 +10,7 @@ class Worker:
     __salt         = ''
     __connectionId = 1
     __connection   = None
-    __seqId        = 2
+    __seqId        = 3
     __client       = None
 
     def __init__(self, connection, connectionId):

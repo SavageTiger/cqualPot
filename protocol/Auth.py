@@ -18,26 +18,7 @@ class Auth:
             connection.close()
             quit()
 
-        # Stage 1: Auth switch request
-        packet = Packet.Packet(1)
-        packet.append(bytes([254]))                     # Header
-        packet.append('mysql_native_password'.encode()) # Plugin name
-        packet.append(struct.pack('b', 0))              # Plugin name terminator
-        packet.append(salt.encode())                    # Auth data (ROS)
-
-        connection.send(packet.getData())
-
-        # Stage 2: Re-authentication
-        packet = Packet.Packet()
-        packet.fromSocket(connection)
-
-        if not self.__client['passwordHash'] == packet.getData(True):
-            # This should never happen...
-            # TODO: Send a ERR_PACKET (or just call deny()?)
-            connection.close()
-            quit()
-
-        # Stage 3: Send a OK packet, the server is happy.
+        # Send the ok package, telling that the server is happy.
         packet = Packet.Packet(2)
         packet.createOkPacket(0)
 

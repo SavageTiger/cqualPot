@@ -59,7 +59,10 @@ class Sqlite:
 
         self.__lastQuery = query
 
-        result = self.__connection.execute(query)
+        try:
+            result = self.__connection.execute(query)
+        except sqlite3.Error as e:
+            print ('ERROR: ' + query) # TODO: Move to logger
 
         return result.fetchall()
 
