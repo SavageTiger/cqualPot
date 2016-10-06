@@ -41,10 +41,17 @@ class Commands:
         definition = self.__database.getColumnDefinitions()
 
         for colDef in definition:
+            response = Packet.Packet(seqId)
             response.createColumnPacket(
                 client['database'], table, colDef['name'], colDef['length'], colDef['type']
             )
 
             socket.send(response.getData())
             seqId += 1
-            quit()
+
+        # Stage 3: Column definition EOF packet
+        response = Packet.Packet(seqId)
+        response.createEOFPacket()
+
+        socket.send(response.getData())
+        seqId += 1

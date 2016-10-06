@@ -38,7 +38,7 @@ class Packet:
         self.append(Util.Util.lenEncodedString(table))    # org_table (same as table)
         self.append(Util.Util.lenEncodedString(column))   # name
         self.append(Util.Util.lenEncodedString(column))   # org_name (same as name)
-        self.append(bytes(12))                            # upcoming fields length [always: 0c]
+        self.append(bytes(b'\x0c'))                       # upcoming fields length [always: 0c]
         self.append(struct.pack('b', 8) + b'\x00')        # Charset ID 8 = latin1_swedish_ci (usually)
         self.append(struct.pack('i', columnLenght))       # Column length
         self.append(struct.pack('b', columnType))         # Column type (see Constants)
@@ -46,6 +46,10 @@ class Packet:
         self.append(struct.pack('b', 0))                  # Decimals
         self.append(b'\x00\x00')                          # Filler
 
+    def createEOFPacket(self):
+        self.append(bytes(b'\xfe'))
+        self.append(bytes(b'\x00\x00')) # Warning numbers
+        self.append(bytes(b'\x00\x00')) # Flags
 
     def createOkPacket(self, header: int, affectedRows: int = 0, lastInsertId: int = 0, status: int = 0, warnings: int = 0, transFlags: int = 0, errorMsg: str = ''):
         self.append(bytes(header))

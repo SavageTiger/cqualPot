@@ -3,12 +3,14 @@ from protocol import Constants
 import sqlite3
 import uuid
 import shutil
+import json
 
 class Sqlite:
 
     __connection = None,
     __tables     = []
     __lastQuery  = ''
+    __variables  = []
 
     def __init__(self):
         randomId = str(uuid.uuid4())
@@ -17,6 +19,7 @@ class Sqlite:
 
         self.__connection = sqlite3.connect('tmp/' + randomId + '.sqlite')
         self.__tables     = self.__connection.execute('SELECT name FROM sqlite_master WHERE type=\'table\'').fetchall()
+        self.__variables  = json.load(open('database_template/variables.json', 'r'))
 
     def getColumnDefinitions(self):
         # SQLite has really limited field type support. So lets just assume 255 varchar and 8 byte longs.
@@ -50,14 +53,26 @@ class Sqlite:
 
         return ''
 
+    def resolveVariable(self, query: str):
+        for variableKey in self.__variables:
+            if query.find(variableKey) > 0:
+                return self.__variables[variableKey]
+
+        return ''
+
     def executeQuery(self, query: str):
         query = query.strip()
 
+        self.__lastQuery = query
+
         # Sqlite has no SET support, so lets just ignore it for now
+        # TODO implement internal updateVariable
         if query.upper()[0:3] == 'SET':
             return []
 
-        self.__lastQuery = query
+        # Crudely simulate variable request response
+        if query.find('@@') > 0 and self.resolveVariable(query) != '':
+            return [ self.resolveVariable(query) ]
 
         try:
             result = self.__connection.execute(query)
