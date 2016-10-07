@@ -43,8 +43,8 @@ class Worker:
             packet.fromSocket(self.__connection)
 
             if Constants.SERVER_CMD_QUERY == packet.getData(True)[0]:
-                self.__seqId += 1
-
-                command.handleQuery(self.__seqId, packet, self.__connection, self.__client)
+                self.__seqId += command.handleQuery(self.__seqId, packet, self.__connection, self.__client)
+            elif Constants.SERVER_CMD_PING == packet.getData(True)[0]:
+                self.__seqId += command.handlePing(self.__seqId, self.__connection)
             else:
-                print('Unknown packet')
+                print('Unknown packet (' + str(packet.getData(True)[0]) + ')')

@@ -31,6 +31,10 @@ class Packet:
         self.__seqId = struct.unpack('b', data[0:1])[0]
         self.__data  = data[1:]
 
+    def createResultPacket(self, record: tuple):
+        for column in record:
+            self.append(Util.Util.lenEncodedString(column))
+
     def createColumnPacket(self, database: str, table: str, column: str, columnLenght: int, columnType: int):
         self.append(Util.Util.lenEncodedString("def"))    # catalog (always "def")
         self.append(Util.Util.lenEncodedString(database)) # db (schema?)

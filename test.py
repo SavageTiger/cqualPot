@@ -1,9 +1,14 @@
 
 from mysql import connector
 
-conn = connector.connect(user='Sven', password='test', port=3309, database='plopjes')
+conn = connector.connect(user='sven', password='test', port=3309, database='mysql')
 
-print(conn.cmd_query('SELECT * FROM company WHERE name like \'co%\''))
+cursor = conn.cursor()
+#cursor.execute('SELECT * FROM company WHERE name like \'co%\'')
+cursor.execute('show databases')
 
-for row in conn.get_row():
+row = cursor.fetchone()
+
+while row != None:
     print(row)
+    row = cursor.fetchone()

@@ -7,10 +7,11 @@ import json
 
 class Sqlite:
 
-    __connection = None,
-    __tables     = []
-    __lastQuery  = ''
-    __variables  = []
+    __connection      = None,
+    __tables          = []
+    __lastQuery       = ''
+    __variables       = []
+    __expectedColumns = None
 
     def __init__(self):
         randomId = str(uuid.uuid4())
@@ -27,7 +28,14 @@ class Sqlite:
         length     = { 'TEXT': 255, 'INTEGER': 8, 'NUMERIC': 8 }
 
         definition = []
-        columns    = self.__connection.execute('PRAGMA table_info(' + self.guessTable() + ')').fetchall()
+
+        if self.__expectedColumns != None:
+            columns = self.__expectedColumns
+
+            # Reset
+            self.__expectedColumns = None
+        else:
+            columns = self.__connection.execute('PRAGMA table_info(' + self.guessTable() + ')').fetchall()
 
         for c in columns:
             definition.append({
@@ -37,7 +45,6 @@ class Sqlite:
             })
 
         return definition
-
 
     def guessTable(self):
         # TODO: dbname.tablename
@@ -60,8 +67,18 @@ class Sqlite:
 
         return ''
 
+    def handleShow(self, query: str):
+        if query.upper().find('DATABASES'):
+            self.__expectedColumns = [(0, 'Database', 'TEXT')]
+
+            return [['mysql']]
+
+        return []
+
     def executeQuery(self, query: str):
         query = query.strip()
+
+        print ('Q:' + query)
 
         self.__lastQuery = query
 
@@ -70,14 +87,20 @@ class Sqlite:
         if query.upper()[0:3] == 'SET':
             return []
 
+        if query.upper()[0:4] == 'SHOW':
+            return self.handleShow(query)
+
         # Crudely simulate variable request response
         if query.find('@@') > 0 and self.resolveVariable(query) != '':
-            return [ self.resolveVariable(query) ]
+            return [ (self.resolveVariable(query)) ]
 
         try:
             result = self.__connection.execute(query)
+
+            return result.fetchall()
         except sqlite3.Error as e:
             print ('ERROR: ' + query) # TODO: Move to logger
 
-        return result.fetchall()
+            return e
+
 
