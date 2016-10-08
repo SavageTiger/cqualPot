@@ -9,6 +9,7 @@ class Packet:
     __seqId = 0
 
     def __init__(self, seqId: int = 0):
+        print(seqId)
         self.__data = bytearray()
         self.__seqId = seqId
 

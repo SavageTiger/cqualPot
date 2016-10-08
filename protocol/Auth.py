@@ -10,14 +10,6 @@ class Auth:
     __client = None
 
     def accept(self, connection: socket.socket, salt: str):
-        if not \
-        self.__client['capabilities'] & Constants.CLIENT_PLUGIN_AUTH or \
-        self.__client['pluginName'] != 'mysql_native_password':
-            # TODO: Log incompatibility error
-            # TODO: Send a ERR_PACKET (or just call deny()?)
-            connection.close()
-            quit()
-
         # Send the ok package, telling that the server is happy.
         packet = Packet.Packet(2)
         packet.createOkPacket(0)

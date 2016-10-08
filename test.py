@@ -5,7 +5,9 @@ conn = connector.connect(user='sven', password='test', port=3309, database='mysq
 
 cursor = conn.cursor()
 #cursor.execute('SELECT * FROM company WHERE name like \'co%\'')
-cursor.execute('show databases')
+cursor.execute('select @@version_comment limit 1')
+
+print(cursor.column_names)
 
 row = cursor.fetchone()
 

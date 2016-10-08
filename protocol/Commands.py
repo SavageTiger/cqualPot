@@ -32,7 +32,6 @@ class Commands:
             response.createOkPacket(0)
 
             socket.send(response.getData())
-
             seqId += 1
 
             return seqId

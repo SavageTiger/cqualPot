@@ -24,8 +24,8 @@ class Sqlite:
 
     def getColumnDefinitions(self):
         # SQLite has really limited field type support. So lets just assume 255 varchar and 8 byte longs.
-        types      = { 'TEXT': Constants.FIELD_TYPE_VARCHAR, 'INTEGER': Constants.FIELD_TYPE_LONG, 'NUMERIC': Constants.FIELD_TYPE_LONG }
-        length     = { 'TEXT': 255, 'INTEGER': 8, 'NUMERIC': 8 }
+        types  = { 'TEXT': Constants.FIELD_TYPE_VARCHAR, 'INTEGER': Constants.FIELD_TYPE_LONG, 'NUMERIC': Constants.FIELD_TYPE_LONG }
+        length = { 'TEXT': 255, 'INTEGER': 8, 'NUMERIC': 8 }
 
         definition = []
 
@@ -63,7 +63,9 @@ class Sqlite:
     def resolveVariable(self, query: str):
         for variableKey in self.__variables:
             if query.find(variableKey) > 0:
-                return self.__variables[variableKey]
+                self.__expectedColumns = [(0, variableKey, 'TEXT')]
+
+                return [[ self.__variables[variableKey] ]]
 
         return ''
 
@@ -71,7 +73,7 @@ class Sqlite:
         if query.upper().find('DATABASES'):
             self.__expectedColumns = [(0, 'Database', 'TEXT')]
 
-            return [['mysql']]
+            return [[ 'mysql' ]]
 
         return []
 
@@ -92,7 +94,7 @@ class Sqlite:
 
         # Crudely simulate variable request response
         if query.find('@@') > 0 and self.resolveVariable(query) != '':
-            return [ (self.resolveVariable(query)) ]
+            return self.resolveVariable(query)
 
         try:
             result = self.__connection.execute(query)
