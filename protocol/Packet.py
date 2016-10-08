@@ -9,7 +9,6 @@ class Packet:
     __seqId = 0
 
     def __init__(self, seqId: int = 0):
-        print(seqId)
         self.__data = bytearray()
         self.__seqId = seqId
 
@@ -22,15 +21,16 @@ class Packet:
         bufferSize = struct.unpack('i', bufferSize)
         bufferSize = bufferSize[0] + 1
 
-        data = bytes()
+        data  = bytes()
 
         while len(data) < bufferSize:
             buffer = connection.recv(bufferSize)
+            data   = data.fromhex(data.hex() + buffer.hex())
 
-            data = data.fromhex(data.hex() + buffer.hex())
+        seqId = struct.unpack('b', data[0:1])[0]
+        self.__data = data[1:]
 
-        self.__seqId = struct.unpack('b', data[0:1])[0]
-        self.__data  = data[1:]
+        return seqId
 
     def createResultPacket(self, record: tuple):
         for column in record:
@@ -75,7 +75,7 @@ class Packet:
         packet = bytearray()
         packet = packet.fromhex(
             struct.pack('i', len(self.__data)).hex()[0:6] + # Packet length (3 byte integer)
-            struct.pack('b', self.__seqId).hex() +
+            struct.pack('B', self.__seqId).hex() +
             self.__data.hex()
         )
 

@@ -4,16 +4,18 @@ from protocol import Auth
 from protocol import Packet
 from protocol import Constants
 from protocol import Commands
+from protocol import SeqId
 
 class Worker:
 
     __salt         = ''
     __connectionId = 1
     __connection   = None
-    __seqId        = 1
+    __seqId        = None
     __client       = None
 
     def __init__(self, connection, connectionId):
+        self.__seqId        = SeqId.SeqId()
         self.__connectionId = connectionId
         self.__connection   = connection
 
@@ -39,12 +41,14 @@ class Worker:
         command = Commands.Commands()
 
         while True:
-            packet = Packet.Packet()
-            packet.fromSocket(self.__connection)
+            packet      = Packet.Packet()
+            clientSeqId = packet.fromSocket(self.__connection)
+
+            self.__seqId.set(clientSeqId)
 
             if Constants.SERVER_CMD_QUERY == packet.getData(True)[0]:
-                self.__seqId += command.handleQuery(self.__seqId, packet, self.__connection, self.__client)
+                command.handleQuery(self.__seqId, packet, self.__connection, self.__client)
             elif Constants.SERVER_CMD_PING == packet.getData(True)[0]:
-                self.__seqId += command.handlePing(self.__seqId, self.__connection)
+                command.handlePing(self.__seqId, self.__connection)
             else:
                 print('Unknown packet (' + str(packet.getData(True)[0]) + ')')
