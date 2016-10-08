@@ -7,9 +7,11 @@ import socket
 class Commands:
 
     __database = None
+    __client   = None
 
-    def __init__(self):
-        self.__database = Sqlite.Sqlite()
+    def __init__(self, client: dict):
+        self.__database = Sqlite.Sqlite(client['database'])
+        self.__client   = client
 
     def handlePing(self, seqId: SeqId.SeqId, socket: socket.socket):
         response = Packet.Packet(seqId.getId())
@@ -17,7 +19,7 @@ class Commands:
 
         socket.send(response.getData())
 
-    def handleQuery(self, seqId: SeqId.SeqId, packet: Packet.Packet, socket: socket.socket, client: dict):
+    def handleQuery(self, seqId: SeqId.SeqId, packet: Packet.Packet, socket: socket.socket):
         query = packet.getData(True)[1:]
         query = query.decode()
 
@@ -43,7 +45,7 @@ class Commands:
         for colDef in definition:
             response = Packet.Packet(seqId.getId())
             response.createColumnPacket(
-                client['database'], table, colDef['name'], colDef['length'], colDef['type']
+                self.__client['database'], table, colDef['name'], colDef['length'], colDef['type']
             )
 
             socket.send(response.getData())

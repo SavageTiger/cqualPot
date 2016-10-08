@@ -38,7 +38,7 @@ class Worker:
         self.__salt = handshake.send(self.__connection, self.__connectionId)
 
     def commandLoop(self):
-        command = Commands.Commands()
+        command = Commands.Commands(self.__client)
 
         while True:
             packet      = Packet.Packet()
@@ -47,7 +47,7 @@ class Worker:
             self.__seqId.set(clientSeqId)
 
             if Constants.SERVER_CMD_QUERY == packet.getData(True)[0]:
-                command.handleQuery(self.__seqId, packet, self.__connection, self.__client)
+                command.handleQuery(self.__seqId, packet, self.__connection)
             elif Constants.SERVER_CMD_PING == packet.getData(True)[0]:
                 command.handlePing(self.__seqId, self.__connection)
             else:

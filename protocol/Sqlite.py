@@ -7,20 +7,23 @@ import json
 
 class Sqlite:
 
-    __connection      = None,
-    __tables          = []
-    __lastQuery       = ''
-    __variables       = []
-    __expectedColumns = None
+    __connection       = None,
+    __tables           = []
+    __lastQuery        = ''
+    __variables        = []
+    __selectedDatabase = ''
+    __expectedColumns  = None
 
-    def __init__(self):
+    def __init__(self, selectedDatabase: str):
         randomId = str(uuid.uuid4())
 
         shutil.copy('database_template/fake.db', 'tmp/' + randomId + '.sqlite')
 
         self.__connection = sqlite3.connect('tmp/' + randomId + '.sqlite')
-        self.__tables     = self.__connection.execute('SELECT name FROM sqlite_master WHERE type=\'table\'').fetchall()
-        self.__variables  = json.load(open('database_template/variables.json', 'r'))
+
+        self.__variables        = json.load(open('database_template/variables.json', 'r'))
+        self.__tables           = self.__connection.execute('SELECT name FROM sqlite_master WHERE type=\'table\'').fetchall()
+        self.__selectedDatabase = selectedDatabase
 
     def getColumnDefinitions(self):
         # SQLite has really limited field type support. So lets just assume 255 varchar and 8 byte longs.
@@ -70,10 +73,19 @@ class Sqlite:
         return ''
 
     def handleShow(self, query: str):
-        if query.upper().find('DATABASES'):
+        # SHOW DATABASES
+        if query.upper().find('DATABASES') > 0:
             self.__expectedColumns = [(0, 'Database', 'TEXT')]
 
-            return [[ 'mysql' ]]
+            if self.__selectedDatabase == '':
+                selectedDatabase = 'Honeypot' # Todo, make configurable
+            else:
+                selectedDatabase = self.__selectedDatabase
+
+            if selectedDatabase.upper() == 'MYSQL':
+                return [['mysql']]
+            else:
+                return [['mysql'], [selectedDatabase]]
 
         return []
 
