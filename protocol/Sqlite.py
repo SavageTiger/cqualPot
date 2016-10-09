@@ -50,18 +50,21 @@ class Sqlite:
         return definition
 
     def guessTable(self):
-        # TODO: dbname.tablename
-        # Look in the middle of the query
-        for table in self.__tables:
-            if self.__lastQuery.lower().find(' ' + table[0] + ' ') > 0:
-                return table[0]
+        try:
+            explainResult = self.__connection.execute('EXPLAIN QUERY PLAN ' + self.__lastQuery).fetchone()
 
-        # Look at the end of the query
-        for table in self.__tables:
-            if self.__lastQuery.lower().find(' ' + table[0]) > 0:
-                return table[0]
+            if explainResult[3].index('SCAN TABLE ') == 0:
+                explainResult = explainResult[3][11:]
 
-        return ''
+                if explainResult.find(' ') > 0:
+                    explainResult = explainResult[:explainResult.find(' ')]
+
+                return explainResult
+
+        except sqlite3.Error as e:
+            return 'Unknown'
+
+        return 'Unknown'
 
     def resolveVariable(self, query: str):
         for variableKey in self.__variables:
@@ -91,8 +94,6 @@ class Sqlite:
 
     def executeQuery(self, query: str):
         query = query.strip()
-
-        print ('Q:' + query)
 
         self.__lastQuery = query
 

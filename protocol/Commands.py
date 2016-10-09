@@ -24,7 +24,10 @@ class Commands:
         query = query.decode()
 
         result = self.__database.executeQuery(query)
-        table  = self.__database.guessTable()
+        table = self.__database.guessTable()
+
+        print('Q:' + query)
+        print('T:' + table)
 
         # No results, return a OK package
         if (len(result) == 0):
@@ -32,6 +35,8 @@ class Commands:
             response.createOkPacket(0)
 
             socket.send(response.getData())
+
+            return None
 
         # Stage 1: Send the column count package
         response = Packet.Packet(seqId.getId())
