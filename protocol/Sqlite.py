@@ -31,14 +31,12 @@ class Sqlite:
         length = { 'TEXT': 255, 'INTEGER': 8, 'NUMERIC': 8 }
 
         definition = []
+        columns = self.__expectedColumns
 
-        if self.__expectedColumns != None:
-            columns = self.__expectedColumns
-
-            # Reset
-            self.__expectedColumns = None
-        else:
-            columns = self.__connection.execute('PRAGMA table_info(' + self.guessTable() + ')').fetchall()
+        # SQLite3 C extension uses sqlite3_column_type() internally to determine the field data type.
+        # So we assume that
+        #   int = LONG length 8
+        #   str = VARCHAR length 255
 
         for c in columns:
             definition.append({
@@ -110,7 +108,10 @@ class Sqlite:
             return self.resolveVariable(query)
 
         try:
-            result = self.__connection.execute(query)
+            result = self.__connection.cursor()
+            result.execute(query)
+
+            self.__expectedColumns = result.description
 
             return result.fetchall()
         except sqlite3.Error as e:
