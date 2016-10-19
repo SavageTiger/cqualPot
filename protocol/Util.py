@@ -19,6 +19,8 @@ class Util:
 
     @staticmethod
     def lenEncodedString(input: str):
+        input = str(input)
+
         lenByte = Util.lenEnc(len(input))
         buffer  = bytearray(lenByte)
 
