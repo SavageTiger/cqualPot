@@ -5,7 +5,7 @@ conn = connector.connect(user='sven', password='test', port=3309, database='mysq
 
 cursor = conn.cursor()
 #cursor.execute('select \'a\' as id, *, (select id from customer where id like \'%\' || substr(company.id, 1, 4) || \'%\' limit 1) as custId from company left join customer on company.id = customer.id left join user_agent on company.id = user_agent.id')
-cursor.execute('select * from test')
+cursor.execute('select *, null as bla from customer')
 
 
 print(cursor.description)

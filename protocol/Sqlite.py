@@ -25,26 +25,32 @@ class Sqlite:
         self.__tables           = self.__connection.execute('SELECT name FROM sqlite_master WHERE type=\'table\'').fetchall()
         self.__selectedDatabase = selectedDatabase
 
-    def getColumnDefinitions(self):
+    def getColumnDefinitions(self, result:tuple):
         # SQLite has really limited field type support. So lets just assume 255 varchar and 8 byte longs.
         types  = { 'TEXT': Constants.FIELD_TYPE_VARCHAR, 'INTEGER': Constants.FIELD_TYPE_LONG, 'NUMERIC': Constants.FIELD_TYPE_LONG }
         length = { 'TEXT': 255, 'INTEGER': 8, 'NUMERIC': 8 }
 
-        definition = []
-        columns = self.__expectedColumns
+        definition   = []
+        columns      = self.__expectedColumns
+        columnOffset = 0
 
         # SQLite3 C extension uses sqlite3_column_type() internally to determine the field data type.
         # So we assume that
         #   int = LONG length 8
         #   str = VARCHAR length 255
 
+
         for c in columns:
             definition.append({
-                'name'   : c[1],
-                'type'   : types[c[2]],
-                'length' : length[c[2]]
+                'name'   : c[0],
+                'type'   : types['TEXT' if type(result[0][columnOffset]) == str else 'NUMERIC'],
+                'length' : length['TEXT' if type(result[0][columnOffset]) == str else 'NUMERIC']
             })
+            print(type(result[0][columnOffset]))
+            print(result[0][columnOffset])
+            columnOffset += 1
 
+        print(definition)
         return definition
 
     def guessTable(self):

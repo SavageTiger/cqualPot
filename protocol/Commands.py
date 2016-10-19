@@ -45,7 +45,7 @@ class Commands:
         socket.send(response.getData())
 
         # Stage 2: Send the column definition packages
-        definition = self.__database.getColumnDefinitions()
+        definition = self.__database.getColumnDefinitions(result)
 
         for colDef in definition:
             response = Packet.Packet(seqId.getId())
